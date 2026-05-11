@@ -25,6 +25,55 @@ client.save_index(index)
 
 Without a model, the package still loads files, builds a simple tree, and uses keyword retrieval as a fallback.
 
+## Quick CLI
+
+```powershell
+.\llmrag_scripts\quickstart.ps1 `
+  -File .\README.md `
+  -Query "What is PageIndex?" `
+  -NoSummarize
+```
+
+With a LiteLLM-compatible model:
+
+```powershell
+.\llmrag_scripts\quickstart.ps1 `
+  -File .\examples\documents\attention-residuals.pdf `
+  -Query "Explain Attention Residuals in simple language." `
+  -Model "deepseek/deepseek-v4-flash" `
+  -SaveIndex
+```
+
+You can also call the module directly:
+
+```powershell
+python -m llmrag.cli ask --file README.md --query "What is PageIndex?" --no-summarize
+python -m llmrag.cli index --file README.md --no-summarize
+python -m llmrag.cli show-index --index .llmrag\<index_id>.llmrag.json
+```
+
+## Quick API
+
+Install the server extras first:
+
+```powershell
+.\llmrag_scripts\install_llmrag_deps.ps1
+```
+
+Then start the local API and open http://127.0.0.1:8000:
+
+```powershell
+.\llmrag_scripts\serve_api.ps1
+```
+
+Useful endpoints:
+
+- `GET /health`
+- `POST /indexes/path`
+- `POST /indexes/upload`
+- `POST /ask`
+- `GET /indexes`
+
 ## Main Modules
 
 - `client.py`: high-level API for indexing, asking, rendering, saving, and loading.

@@ -18,6 +18,9 @@ git switch -c codex/your-feature
 
 # run local checks
 .\llmrag_scripts\dev_check.ps1
+
+# install llmrag extras for CLI/API work
+.\llmrag_scripts\install_llmrag_deps.ps1
 ```
 
 The intent is to keep `pageindex/`, the root `README.md`, and PageIndex's root config files mostly untouched. New package code lives in `llmrag/`; llmrag documentation and packaging metadata live in `llmrag_info/`; local helper scripts live in `llmrag_scripts/`.
