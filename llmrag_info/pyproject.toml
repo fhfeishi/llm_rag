@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llmrag"
+version = "0.1.0"
+description = "LLM-native RAG over structured file trees."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "litellm>=1.83.7",
+  "pydantic>=2.0",
+  "PyPDF2>=3.0.1",
+  "python-pptx>=1.0.0",
+  "openpyxl>=3.1.0",
+]
+
+[tool.setuptools.package-dir]
+"" = ".."
+
+[tool.setuptools.packages.find]
+where = [".."]
+include = ["llmrag*"]
