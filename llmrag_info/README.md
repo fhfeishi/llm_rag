@@ -44,6 +44,17 @@ With a LiteLLM-compatible model:
   -SaveIndex
 ```
 
+With a local OpenAI-compatible model server:
+
+```powershell
+.\llmrag_scripts\quickstart.ps1 `
+  -File .\README.md `
+  -Query "What is PageIndex?" `
+  -Model "local-model" `
+  -LocalBaseUrl "http://127.0.0.1:8080/v1" `
+  -NoSummarize
+```
+
 You can also call the module directly:
 
 ```powershell
@@ -84,6 +95,9 @@ Useful endpoints:
 - `llm.py`: LiteLLM wrapper for OpenAI-compatible providers.
 - `renderers.py`: JSON, Markdown, and HTML output.
 - `storage.py`: index persistence.
+- `llm_local.py`: local OpenAI-compatible LLM client for llama.cpp/vLLM.
+
+See [LOCAL_LLM.md](LOCAL_LLM.md) for local model setup notes.
 
 ## File Support
 

@@ -4,6 +4,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$Query,
     [string]$Model = "",
+    [string]$LocalBaseUrl = "",
     [string]$Workspace = ".llmrag",
     [ValidateSet("json", "markdown", "html")]
     [string]$Output = "markdown",
@@ -23,6 +24,9 @@ $argsList = @(
 
 if ($Model) {
     $argsList += @("--model", $Model)
+}
+if ($LocalBaseUrl) {
+    $argsList += @("--local-base-url", $LocalBaseUrl)
 }
 if ($SaveIndex) {
     $argsList += "--save-index"

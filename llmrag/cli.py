@@ -32,6 +32,8 @@ def _build_parser() -> argparse.ArgumentParser:
     ask.add_argument("--index", help="Existing .llmrag.json index to load.")
     ask.add_argument("--query", required=True, help="Question to answer.")
     ask.add_argument("--model", default=None, help="LiteLLM model name, e.g. deepseek/deepseek-v4-flash.")
+    ask.add_argument("--local-base-url", default=None, help="Local OpenAI-compatible base URL, e.g. http://127.0.0.1:8080/v1.")
+    ask.add_argument("--api-key", default="local", help="API key for local/OpenAI-compatible servers.")
     ask.add_argument("--workspace", default=".llmrag", help="Directory for saved indexes.")
     ask.add_argument("--top-k", type=int, default=5, help="Number of nodes to retrieve.")
     ask.add_argument("--output", choices=[item.value for item in OutputFormat], default=OutputFormat.markdown.value)
@@ -41,6 +43,8 @@ def _build_parser() -> argparse.ArgumentParser:
     index = subparsers.add_parser("index", help="Build and save an index for a file.")
     index.add_argument("--file", required=True, help="File to index.")
     index.add_argument("--model", default=None, help="LiteLLM model name.")
+    index.add_argument("--local-base-url", default=None, help="Local OpenAI-compatible base URL.")
+    index.add_argument("--api-key", default="local", help="API key for local/OpenAI-compatible servers.")
     index.add_argument("--workspace", default=".llmrag", help="Directory for saved indexes.")
     index.add_argument("--no-summarize", action="store_true", help="Skip LLM summaries while indexing.")
     index.add_argument("--output", choices=[item.value for item in OutputFormat], default=OutputFormat.json.value)
@@ -56,7 +60,12 @@ def _ask(args: argparse.Namespace) -> int:
     if not args.file and not args.index:
         raise SystemExit("Provide either --file or --index.")
 
-    client = LlmRagClient(model=args.model, workspace=Path(args.workspace))
+    client = LlmRagClient(
+        model=args.model,
+        local_base_url=args.local_base_url,
+        api_key=args.api_key,
+        workspace=Path(args.workspace),
+    )
     if args.index:
         index = client.load_index(args.index)
     else:
@@ -71,7 +80,12 @@ def _ask(args: argparse.Namespace) -> int:
 
 
 def _index(args: argparse.Namespace) -> int:
-    client = LlmRagClient(model=args.model, workspace=Path(args.workspace))
+    client = LlmRagClient(
+        model=args.model,
+        local_base_url=args.local_base_url,
+        api_key=args.api_key,
+        workspace=Path(args.workspace),
+    )
     index = client.index_file(args.file, summarize=not args.no_summarize)
     saved = client.save_index(index)
     _write_error(f"Saved index: {saved}\n")

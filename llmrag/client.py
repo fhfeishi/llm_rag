@@ -5,6 +5,7 @@ from pathlib import Path
 from .config import RagConfig
 from .indexer import build_index
 from .llm import LLMClient
+from .llm_local import LocalLLMClient
 from .loaders import load_file
 from .models import Answer, LoadedDocument, OutputFormat, RagIndex, RetrievalResult
 from .renderers import render_answer, render_index
@@ -21,7 +22,7 @@ class LlmRagClient:
             data["model"] = model
         data.update({key: value for key, value in overrides.items() if value is not None})
         self.config = RagConfig(**data)
-        self.llm = LLMClient(self.config.model, temperature=self.config.temperature) if self.config.model else None
+        self.llm = self._build_llm()
         self.indexes: dict[str, RagIndex] = {}
 
     def load(self, path: str | Path) -> LoadedDocument:
@@ -100,3 +101,16 @@ Return a clear, concise answer.
             return Path(f"{index.id}.llmrag.json")
         self.config.workspace.mkdir(parents=True, exist_ok=True)
         return self.config.workspace / f"{index.id}.llmrag.json"
+
+    def _build_llm(self):
+        if not self.config.model:
+            return None
+        if self.config.local_base_url:
+            return LocalLLMClient(
+                model=self.config.model,
+                base_url=self.config.local_base_url,
+                api_key=self.config.api_key,
+                temperature=self.config.temperature,
+                timeout=self.config.timeout,
+            )
+        return LLMClient(self.config.model, temperature=self.config.temperature)

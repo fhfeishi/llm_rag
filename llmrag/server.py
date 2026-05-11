@@ -12,6 +12,7 @@ from .client import LlmRagClient
 class IndexPathRequest(BaseModel):
     path: str
     model: str | None = None
+    local_base_url: str | None = None
     summarize: bool = False
 
 
@@ -19,6 +20,7 @@ class AskRequest(BaseModel):
     query: str
     index_id: str | None = None
     model: str | None = None
+    local_base_url: str | None = None
     top_k: int = 5
     output: str = "markdown"
 
@@ -52,18 +54,23 @@ def create_app(workspace: str | Path = ".llmrag_api"):
         path = Path(request.path).expanduser()
         if not path.exists():
             raise HTTPException(status_code=404, detail=f"File not found: {path}")
-        active_client = _client_for_model(request.model, indexes_dir)
+        active_client = _client_for_model(request.model, indexes_dir, request.local_base_url)
         index = active_client.index_file(path, summarize=request.summarize)
         saved = active_client.save_index(index)
         client.add_index(index)
         return {"index_id": index.id, "title": index.title, "saved_to": str(saved)}
 
     @app.post("/indexes/upload")
-    def upload_index(file: UploadFile = File(...), model: str | None = None, summarize: bool = False):
+    def upload_index(
+        file: UploadFile = File(...),
+        model: str | None = None,
+        local_base_url: str | None = None,
+        summarize: bool = False,
+    ):
         target = uploads_dir / Path(file.filename or "upload.bin").name
         with target.open("wb") as f:
             shutil.copyfileobj(file.file, f)
-        active_client = _client_for_model(model, indexes_dir)
+        active_client = _client_for_model(model, indexes_dir, local_base_url)
         index = active_client.index_file(target, summarize=summarize)
         saved = active_client.save_index(index)
         client.add_index(index)
@@ -71,7 +78,7 @@ def create_app(workspace: str | Path = ".llmrag_api"):
 
     @app.post("/ask")
     def ask(request: AskRequest):
-        active_client = _client_for_model(request.model, indexes_dir)
+        active_client = _client_for_model(request.model, indexes_dir, request.local_base_url)
         if request.index_id:
             index = client.get_index(request.index_id)
             active_client.add_index(index)
@@ -97,8 +104,8 @@ def create_app(workspace: str | Path = ".llmrag_api"):
     return app
 
 
-def _client_for_model(model: str | None, workspace: Path) -> LlmRagClient:
-    return LlmRagClient(model=model, workspace=workspace) if model else LlmRagClient(workspace=workspace)
+def _client_for_model(model: str | None, workspace: Path, local_base_url: str | None = None) -> LlmRagClient:
+    return LlmRagClient(model=model, local_base_url=local_base_url, workspace=workspace) if model else LlmRagClient(workspace=workspace)
 
 
 def _home_html() -> str:
@@ -123,6 +130,8 @@ def _home_html() -> str:
   <input id="path" placeholder="D:\\path\\to\\document.pdf" />
   <label>Model, optional</label>
   <input id="model" placeholder="deepseek/deepseek-v4-flash" />
+  <label>Local base URL, optional</label>
+  <input id="localBaseUrl" placeholder="http://127.0.0.1:8080/v1" />
   <button onclick="indexPath()">Index path</button>
   <p id="index"></p>
   <label>Question</label>
@@ -138,6 +147,7 @@ def _home_html() -> str:
         body: JSON.stringify({
           path: document.getElementById('path').value,
           model: document.getElementById('model').value || null,
+          local_base_url: document.getElementById('localBaseUrl').value || null,
           summarize: Boolean(document.getElementById('model').value)
         })
       });
@@ -152,7 +162,8 @@ def _home_html() -> str:
         body: JSON.stringify({
           index_id: indexId,
           query: document.getElementById('query').value,
-          model: document.getElementById('model').value || null
+          model: document.getElementById('model').value || null,
+          local_base_url: document.getElementById('localBaseUrl').value || null
         })
       });
       const data = await res.json();

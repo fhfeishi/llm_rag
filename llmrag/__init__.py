@@ -2,6 +2,7 @@ from .client import LlmRagClient
 from .config import RagConfig
 from .indexer import build_index, flatten_nodes
 from .llm import LLMClient
+from .llm_local import LocalLLMClient, LocalLLMEndpoint
 from .loaders import detect_file_kind, load_file
 from .models import (
     Answer,
@@ -25,6 +26,8 @@ __all__ = [
     "DocumentPart",
     "FileKind",
     "LLMClient",
+    "LocalLLMClient",
+    "LocalLLMEndpoint",
     "LlmRag",
     "LlmRagClient",
     "LoadedDocument",

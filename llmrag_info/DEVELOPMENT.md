@@ -24,3 +24,5 @@ git switch -c codex/your-feature
 ```
 
 The intent is to keep `pageindex/`, the root `README.md`, and PageIndex's root config files mostly untouched. New package code lives in `llmrag/`; llmrag documentation and packaging metadata live in `llmrag_info/`; local helper scripts live in `llmrag_scripts/`.
+
+Local LLM support is protocol-first. Keep llama.cpp/vLLM process management in `llmrag_scripts/`, and keep `llmrag/` focused on the OpenAI-compatible request path.
